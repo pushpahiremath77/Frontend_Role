@@ -1,0 +1,37 @@
+---
+# tasks file for Frontend
+- name: Configurating Nginx
+  block:
+    - name: Update and upgrade system packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+      register: upgrade_result
+      changed_when: upgrade_result.stdout is not search("0 upgraded, 0 newly installed")
+
+    - name: Force a failure
+      ansible.builtin.command: /bin/false
+
+  rescue:
+    - name: Handle the error
+      debug:
+        msg: "Continuing the execution"
+
+  always:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Configure Nginx for Frontend
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/fundoo.conf
+
+    - name: Enable Nginx Configuration
+      file:
+        src: /etc/nginx/sites-available/fundoo.conf
+        dest: /etc/nginx/sites-enabled/fundoo.conf
+        state: link
+      notify: Restart Nginx

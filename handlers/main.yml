@@ -1,0 +1,7 @@
+---
+# handlers file for Frontend
+- name: Restart Nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
